@@ -5,6 +5,7 @@ export default function App() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [activeNav, setActiveNav] = useState('home');
   const sectionsRef = useRef([]);
 
   useEffect(() => {
@@ -14,6 +15,20 @@ export default function App() {
     };
     const handleScroll = () => {
       setScrollY(window.scrollY);
+      
+      // Update active section based on scroll position
+      const sections = ['home', 'education', 'experience', 'projects', 'skills', 'achievements'];
+      const currentSection = sections.find(section => {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          return rect.top <= 100 && rect.bottom >= 100;
+        }
+        return false;
+      });
+      if (currentSection) {
+        setActiveNav(currentSection);
+      }
     };
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
@@ -22,6 +37,15 @@ export default function App() {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offsetTop = element.offsetTop - 80; // Offset for fixed header
+      window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+      setActiveNav(sectionId);
+    }
+  };
 
   const projects = [
     {
@@ -99,11 +123,69 @@ export default function App() {
         ))}
       </div>
 
+      {/* Header/Navbar */}
+      <header 
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrollY > 50 ? 'bg-slate-950/80 backdrop-blur-lg shadow-lg shadow-blue-500/10' : 'bg-transparent'
+        }`}
+      >
+        <nav className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <button 
+              onClick={() => scrollToSection('home')}
+              className="text-2xl font-black bg-gradient-to-r from-blue-400 to-orange-400 bg-clip-text text-transparent hover:scale-110 transition-transform"
+            >
+              MM
+            </button>
+
+            {/* Navigation Links */}
+            <div className="hidden md:flex items-center gap-8">
+              {[
+                { id: 'home', label: 'Home', icon: <Sparkles className="w-4 h-4" /> },
+                { id: 'education', label: 'Education', icon: <GraduationCap className="w-4 h-4" /> },
+                { id: 'experience', label: 'Experience', icon: <Briefcase className="w-4 h-4" /> },
+                { id: 'projects', label: 'Projects', icon: <Code className="w-4 h-4" /> },
+                { id: 'skills', label: 'Skills', icon: <Terminal className="w-4 h-4" /> },
+                { id: 'achievements', label: 'Achievements', icon: <Award className="w-4 h-4" /> }
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                    activeNav === item.id
+                      ? 'bg-gradient-to-r from-blue-600/30 to-orange-600/30 text-orange-400 border border-orange-500/50'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {item.icon}
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <a
+              href="mailto:muktimishra0495@gmail.com"
+              className="hidden md:flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-orange-600 rounded-full font-semibold hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300"
+            >
+              <Mail className="w-4 h-4" />
+              Contact
+            </a>
+
+            {/* Mobile Menu Button */}
+            <button className="md:hidden p-2 text-white">
+              <Terminal className="w-6 h-6" />
+            </button>
+          </div>
+        </nav>
+      </header>
+
       {/* Main content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
         
         {/* Hero Section with Image */}
-        <section className={`min-h-screen flex items-center justify-center transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <section id="home" className={`min-h-screen flex items-center justify-center transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="grid md:grid-cols-2 gap-12 items-center w-full">
             {/* Left side - Image */}
             <div 
@@ -116,14 +198,13 @@ export default function App() {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-orange-600 blur-3xl opacity-40 group-hover:opacity-60 transition-opacity rounded-full" />
               <div className="relative w-80 h-80 mx-auto">
                 {/* Placeholder for image - replace with actual image */}
-                <img src="./assets/mukti.jpeg" alt="Profile" className="w-48 h-48 rounded-full border-4 border-white shadow-lg shadow-black/50" />
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-orange-500 to-emerald-500 rounded-3xl rotate-6 group-hover:rotate-12 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl flex items-center justify-center border-4 border-blue-500/30 group-hover:border-orange-500/50 transition-all duration-500">
                   <div className="text-center">
                     <div className="w-64 h-64 bg-gradient-to-br from-blue-600 to-orange-600 rounded-2xl flex items-center justify-center text-6xl font-black text-white">
                       MM
                     </div>
-                   {/* <p className="mt-4 text-sm text-gray-400">Upload your photo here</p> */}
+                    <p className="mt-4 text-sm text-gray-400">Upload your photo here</p>
                   </div>
                 </div>
               </div>
@@ -214,6 +295,7 @@ export default function App() {
 
         {/* Education Section */}
         <section 
+          id="education"
           className="py-20"
           style={{
             transform: `translateY(${Math.max(0, 200 - scrollY * 0.3)}px)`,
@@ -255,6 +337,7 @@ export default function App() {
 
         {/* Experience Section */}
         <section 
+          id="experience"
           className="py-20"
           style={{
             transform: `translateX(${Math.max(0, 100 - scrollY * 0.15)}px)`,
@@ -296,6 +379,7 @@ export default function App() {
 
         {/* Projects Section */}
         <section 
+          id="projects"
           className="py-20"
           style={{
             transform: `scale(${Math.min(0.9 + scrollY * 0.0001, 1)})`,
@@ -350,6 +434,7 @@ export default function App() {
 
         {/* Skills Section - Simple Design */}
         <section 
+          id="skills"
           className="py-20"
           style={{
             transform: `translateY(${Math.max(0, 150 - scrollY * 0.2)}px)`,
@@ -456,6 +541,7 @@ export default function App() {
 
         {/* Achievements Section */}
         <section 
+          id="achievements"
           className="py-20"
           style={{
             transform: `translateX(${Math.max(0, -100 + scrollY * 0.1)}px)`,
